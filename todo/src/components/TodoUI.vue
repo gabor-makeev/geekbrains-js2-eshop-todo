@@ -1,23 +1,11 @@
 <template>
   <div class="todo-ui">
-    <button @click="clearTaskList">Clear list</button>
-    <button @click="removeTasksWithState('selectionState')">Remove Selected Tasks</button>
-    <button @click="removeTasksWithState('completionState')">Remove Completed Tasks</button>
+    <button @click="$emit('clear-task-list')">Clear list</button>
+    <button @click="$emit('remove-selected-tasks')">Remove Selected Tasks</button>
+    <button @click="$emit('remove-completed-tasks')">Remove Completed Tasks</button>
+    <button @click="$emit('reset-TODO')">Reset TODO app</button>
   </div>
 </template>
-
-<script>
-export default {
-  props: {
-    clearTaskList: {
-      type: Function
-    },
-    removeTasksWithState: {
-      type: Function
-    }
-  }
-}
-</script>
 
 <style lang="scss" scoped>
 @import '../assets/_variables.scss';

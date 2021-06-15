@@ -1,10 +1,11 @@
 <template>
   <div class="todo">
     <div class="todo-control">
+      <button @click="toggleEditMode" class="todo-control-edit" v-bind:class="{ 'todo-control-edit-on': editMode }">Edit</button>
       <input type="text" placeholder="add a task" v-model="taskContent" class="todo-control-input">
-      <button @click="createTask(taskContent)" class="todo-control-button">Add</button>
+      <button @click="initTaskCreation(taskContent)" class="todo-control-button">Add</button>
     </div>
-    <TodoElement v-for="task in taskList" :key="task.id" :element="task" @remove-element="removeElement" />
+    <TodoElement v-for="task in taskList" :key="task.id" :element="task" @remove-element="removeElement" @toggle-completion-state="toggleCompletionState" :editModeState="editMode" />
   </div>
 </template>
 
@@ -15,39 +16,37 @@ export default {
     TodoElement
   },
   data: () => ({
-    taskContent: ''
+    taskContent: '',
+    editMode: false
   }),
   props: {
     taskList: {
       type: Array,
       default: () => []
     },
-    taskIndex: {
-      type: Number
-    },
     console: {
       type: Array
     },
-    updateIndex: {
+    rerenderTaskIndexes: {
       type: Function
     },
-    rerenderTaskIndexes: {
+    createTask: {
+      type: Function
+    },
+    toggleCompletionState: {
       type: Function
     }
   },
   methods: {
-    createTask (task) {
-      if (task.length) {
-        this.taskList.push({ text: task, number: this.taskList.length + 1, id: `task_${this.taskIndex}`, selectionState: false, completionState: false })
-        this.updateIndex()
-      } else {
-        this.console.push({ message: 'Not valid value entered', number: this.console.length })
-      }
+    initTaskCreation (task) {
+      this.createTask(task)
       this.taskContent = ''
     },
     removeElement (task) {
-      this.taskList.splice((task.number - 1), 1)
-      this.rerenderTaskIndexes()
+      this.$emit('remove-task', task)
+    },
+    toggleEditMode () {
+      this.editMode = !this.editMode
     }
   }
 }
@@ -85,8 +84,8 @@ export default {
         background-color: #171717;
       }
     }
-    &-button {
-      width: 50px;
+    &-button,
+    &-edit {
       height: 25px;
       background-color: #000000;
       color: $defaultGreen;
@@ -95,6 +94,7 @@ export default {
       transition: 0.3s;
       cursor: pointer;
       outline: none;
+      padding: 3px 5px;
       font-family: 'Inconsolata', monospace;
       font-size: 16px;
       &:hover {
@@ -102,6 +102,12 @@ export default {
       }
       &:active {
         background-color: #000000;
+      }
+      &-on {
+        box-shadow: 0 20px 50px rgb(40, 196, 36);
+        &::after {
+          content: 'ing';
+        }
       }
     }
   }

@@ -1,9 +1,9 @@
 <template>
   <div id="app">
     <div class="wrapper">
-      <Console :taskIndex="taskIndex" :console="console" />
-      <Todo :taskIndex="taskIndex" :console="console" :updateIndex="updateIndex" :taskList="taskList" :rerenderTaskIndexes="rerenderTaskIndexes" />
-      <TodoUI :clearTaskList="clearTaskList" :removeTasksWithState="removeTasksWithState"/>
+      <Console :taskIndex="uniqueTasks" :console="console" />
+      <Todo :console="console" :taskList="taskList" :createTask="createTask" @remove-task="removeTask" :toggleCompletionState="toggleCompletionState" />
+      <TodoUI @clear-task-list="clearTaskList" @reset-TODO="resetTODO" @remove-completed-tasks="removeCompletedTasks" @remove-selected-tasks="removeSelectedTasks" />
     </div>
   </div>
 </template>
@@ -21,32 +21,92 @@ export default {
   data: () => ({
     taskList: [],
     console: [],
-    taskIndex: 0
+    uniqueTasks: 0,
+    API_URL: 'http://localhost:3000'
   }),
+  mounted () {
+    this.getTaskList()
+  },
   methods: {
-    updateIndex () {
-      this.taskIndex++
+    makeGETRequest (url) {
+      return fetch(url)
+        .then((data) => {
+          return data.json()
+        })
     },
-    getTasksBasedOnState (state) {
-      const tasksWithState = []
-      this.taskList.forEach(task => {
-        if (!task[state]) {
-          tasksWithState.push(task)
-        }
+    makePOSTRequest (url, data) {
+      return fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
       })
-      return tasksWithState
+        .then((data) => {
+          return data.json()
+        })
     },
-    removeTasksWithState (state) {
-      this.taskList = this.getTasksBasedOnState(state)
-      this.rerenderTaskIndexes()
+    getTaskList () {
+      this.makeGETRequest(`${this.API_URL}/taskList`)
+        .then((data) => {
+          this.taskList = data
+        })
     },
-    rerenderTaskIndexes () {
-      for (let task = 1; task <= this.taskList.length; task++) {
-        this.taskList[task - 1].number = task
+    createTask (task) {
+      if (task.length) {
+        this.makePOSTRequest(`${this.API_URL}/addTask`, { text: task, number: this.taskList.length + 1, selectionState: false, completionState: false })
+          .then(() => {
+            this.getTaskList()
+          })
+        this.uniqueTasks++
+      } else {
+        this.console.push({ message: 'Not valid value entered', number: this.console.length })
       }
     },
+    removeTask (task) {
+      this.makePOSTRequest(`${this.API_URL}/removeTask`, task)
+        .then(() => {
+          this.getTaskList()
+        })
+    },
+    resetTODO () {
+      this.makePOSTRequest(`${this.API_URL}/ResetTODOApp`)
+        .then(() => {
+          this.getTaskList()
+        })
+    },
+    toggleCompletionState (task) {
+      this.makePOSTRequest(`${this.API_URL}/toggleCompletion`, task)
+        .then(() => {
+          this.getTaskList()
+        })
+    },
+    removeCompletedTasks () {
+      this.makePOSTRequest(`${this.API_URL}/removeCompletedTasks`)
+        .then(() => {
+          this.getTaskList()
+        })
+    },
+    getSelectedTasksIDs () {
+      const selectedTasksIDs = []
+      this.taskList.forEach(task => {
+        if (task.selectionState) {
+          selectedTasksIDs.push(task.id)
+        }
+      })
+      return selectedTasksIDs
+    },
+    removeSelectedTasks () {
+      this.makePOSTRequest(`${this.API_URL}/removeSelectedTasks`, this.getSelectedTasksIDs())
+        .then(() => {
+          this.getTaskList()
+        })
+    },
     clearTaskList () {
-      this.taskList = []
+      this.makePOSTRequest(`${this.API_URL}/removeAllTasks`)
+        .then(() => {
+          this.getTaskList()
+        })
     }
   }
 }
