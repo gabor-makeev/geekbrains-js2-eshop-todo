@@ -2,6 +2,7 @@
   <div class="todo-element" :id=element.id v-bind:class="{ 'todo-element-selected': element.selectionState }">
     <input class="todo-element-checkbox" type="checkbox" @click="toggleSelectionState(element)" v-show="editModeState">
     <span class="todo-element-text" v-bind:class="{ 'todo-element-completed': element.completionState }" @click="$emit('toggle-completion-state', element)">{{ element.number }}. {{ element.text }}</span>
+    <span v-show="element.priority !== 0" v-bind:class="{ 'todo-element-priority-high': element.priority === 'High', 'todo-element-priority-normal': element.priority === 'Normal', 'todo-element-priority-low': element.priority === 'Low' }">{{ element.priority }}</span>
     <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="times" class="svg-inline--fa fa-times fa-w-11 todo-element-cross" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512" @click="$emit('remove-element', element)" v-show="!editModeState">
       <path d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"></path>
     </svg>
@@ -29,12 +30,12 @@ export default {
 <style lang="scss" scoped>
 @import '../assets/_variables.scss';
 .todo-element {
-  width: 100%;
-  height: 40px;
+  width: 250px;
+  min-height: 40px;
   display: flex;
   align-items: center;
   gap: 15px;
-  padding: 0 60px;
+  margin: 0 60px;
   transition: 0.3s;
   &-selected {
     background-color: rgba(130, 129, 129, 0.65);
@@ -50,6 +51,17 @@ export default {
     cursor: default;
     &:hover {
       color: $lighterGreen;
+    }
+  }
+  &-priority {
+    &-low {
+      color: #4287f5;
+    }
+    &-normal {
+      color: #fcad03;
+    }
+    &-high {
+      color: #fc2403;
     }
   }
   &-cross {

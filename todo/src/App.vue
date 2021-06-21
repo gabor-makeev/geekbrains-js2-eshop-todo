@@ -3,7 +3,7 @@
     <div class="wrapper">
       <Console :taskIndex="uniqueTasks" :console="console" />
       <Todo :console="console" :taskList="taskList" :createTask="createTask" @remove-task="removeTask" :toggleCompletionState="toggleCompletionState" />
-      <TodoUI @clear-task-list="clearTaskList" @reset-TODO="resetTODO" @remove-completed-tasks="removeCompletedTasks" @remove-selected-tasks="removeSelectedTasks" />
+      <TodoUI @clear-task-list="clearTaskList" @reset-TODO="resetTODO" @remove-completed-tasks="removeCompletedTasks" @remove-selected-tasks="removeSelectedTasks" @filter-list="filterList" @sort-list="sortList" />
     </div>
   </div>
 </template>
@@ -20,6 +20,7 @@ export default {
   },
   data: () => ({
     taskList: [],
+    originalList: [],
     console: [],
     uniqueTasks: 0,
     API_URL: 'http://localhost:3000'
@@ -50,11 +51,12 @@ export default {
       this.makeGETRequest(`${this.API_URL}/taskList`)
         .then((data) => {
           this.taskList = data
+          this.originalList = data
         })
     },
-    createTask (task) {
+    createTask (task, taskPriority) {
       if (task.length) {
-        this.makePOSTRequest(`${this.API_URL}/addTask`, { text: task, number: this.taskList.length + 1, selectionState: false, completionState: false })
+        this.makePOSTRequest(`${this.API_URL}/addTask`, { text: task, number: this.taskList.length + 1, selectionState: false, completionState: false, priority: taskPriority })
           .then(() => {
             this.getTaskList()
           })
@@ -69,11 +71,12 @@ export default {
           this.getTaskList()
         })
     },
-    resetTODO () {
+    resetTODO (cb) {
       this.makePOSTRequest(`${this.API_URL}/ResetTODOApp`)
         .then(() => {
           this.getTaskList()
         })
+      cb()
     },
     toggleCompletionState (task) {
       this.makePOSTRequest(`${this.API_URL}/toggleCompletion`, task)
@@ -81,11 +84,12 @@ export default {
           this.getTaskList()
         })
     },
-    removeCompletedTasks () {
+    removeCompletedTasks (cb) {
       this.makePOSTRequest(`${this.API_URL}/removeCompletedTasks`)
         .then(() => {
           this.getTaskList()
         })
+      cb()
     },
     getSelectedTasksIDs () {
       const selectedTasksIDs = []
@@ -96,17 +100,53 @@ export default {
       })
       return selectedTasksIDs
     },
-    removeSelectedTasks () {
+    removeSelectedTasks (cb) {
       this.makePOSTRequest(`${this.API_URL}/removeSelectedTasks`, this.getSelectedTasksIDs())
         .then(() => {
           this.getTaskList()
         })
+      cb()
     },
-    clearTaskList () {
+    clearTaskList (cb) {
       this.makePOSTRequest(`${this.API_URL}/removeAllTasks`)
         .then(() => {
           this.getTaskList()
         })
+      cb()
+    },
+    filterList (option) {
+      if (option === 'All') {
+        this.getTaskList()
+      } else if (option === 'Completed') {
+        this.taskList = this.originalList.filter(task => task.completionState)
+      } else if (option === 'Without Priority') {
+        this.taskList = this.originalList.filter(task => task.priority === 0)
+      } else {
+        this.taskList = this.originalList.filter(task => task.priority === option)
+      }
+    },
+    sortList (option) {
+      const prioritiesArray = ['High', 'Normal', 'Low', 0]
+      this.taskList = []
+      if (option === 'Default') {
+        this.getTaskList()
+      } else if (option === 'HighLow') {
+        for (let priority = 0; priority <= prioritiesArray.length; priority++) {
+          this.originalList.forEach(task => {
+            if (task.priority === prioritiesArray[priority]) {
+              this.taskList.push(task)
+            }
+          })
+        }
+      } else {
+        for (let priority = prioritiesArray.length - 1; priority >= 0; priority--) {
+          this.originalList.forEach(task => {
+            if (task.priority === prioritiesArray[priority]) {
+              this.taskList.push(task)
+            }
+          })
+        }
+      }
     }
   }
 }
@@ -134,7 +174,7 @@ body {
 }
 
 .wrapper {
-  width: 1000px;
+  width: 1140px;
   position: relative;
   display: flex;
   justify-content: space-between;

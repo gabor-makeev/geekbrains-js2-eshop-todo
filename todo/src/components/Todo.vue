@@ -3,7 +3,13 @@
     <div class="todo-control">
       <button @click="toggleEditMode" class="todo-control-edit" v-bind:class="{ 'todo-control-edit-on': editMode }">Edit</button>
       <input type="text" placeholder="add a task" v-model="taskContent" class="todo-control-input">
-      <button @click="initTaskCreation(taskContent)" class="todo-control-button">Add</button>
+      <select class="todo-control-priority" v-model="taskPriority">
+        <option value="0" id="defaultPriority" selected disabled hidden>Set priority</option>
+        <option value="High">High</option>
+        <option value="Normal">Normal</option>
+        <option value="Low">Low</option>
+      </select>
+      <button @click="initTaskCreation(taskContent, taskPriority)" class="todo-control-button">Add</button>
     </div>
     <TodoElement v-for="task in taskList" :key="task.id" :element="task" @remove-element="removeElement" @toggle-completion-state="toggleCompletionState" :editModeState="editMode" />
   </div>
@@ -17,8 +23,12 @@ export default {
   },
   data: () => ({
     taskContent: '',
+    taskPriority: '',
     editMode: false
   }),
+  mounted () {
+    this.taskPriority = 0
+  },
   props: {
     taskList: {
       type: Array,
@@ -38,9 +48,10 @@ export default {
     }
   },
   methods: {
-    initTaskCreation (task) {
-      this.createTask(task)
+    initTaskCreation (task, taskPriority) {
+      this.createTask(task, taskPriority)
       this.taskContent = ''
+      this.taskPriority = 0
     },
     removeElement (task) {
       this.$emit('remove-task', task)
@@ -85,7 +96,8 @@ export default {
       }
     }
     &-button,
-    &-edit {
+    &-edit,
+    &-priority {
       height: 25px;
       background-color: #000000;
       color: $defaultGreen;
@@ -104,7 +116,6 @@ export default {
         background-color: #000000;
       }
       &-on {
-        box-shadow: 0 20px 50px rgb(40, 196, 36);
         &::after {
           content: 'ing';
         }
