@@ -60,9 +60,14 @@ export default {
           .then(() => {
             this.getTaskList()
           })
+        this.console.push({
+          message: `::Added task:: content: "${task}", priority: ${taskPriority}`
+        })
         this.uniqueTasks++
       } else {
-        this.console.push({ message: 'Not valid value entered', number: this.console.length })
+        this.console.push({
+          message: 'Not valid value entered', number: this.console.length
+        })
       }
     },
     removeTask (task) {
