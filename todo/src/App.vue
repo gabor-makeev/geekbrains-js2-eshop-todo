@@ -54,20 +54,36 @@ export default {
           this.originalList = data
         })
     },
+    createNotification (text, textClass) {
+      const content = []
+      for (let element = 0; element < text.length; element++) {
+        content.push({
+          text: text[element],
+          textClass: textClass[element]
+        })
+      }
+      this.console.push({
+        content: content,
+        number: this.console.length
+      })
+    },
     createTask (task, taskPriority) {
       if (task.length) {
         this.makePOSTRequest(`${this.API_URL}/addTask`, { text: task, number: this.taskList.length + 1, selectionState: false, completionState: false, priority: taskPriority })
           .then(() => {
             this.getTaskList()
           })
-        this.console.push({
-          message: `::Added task:: content: "${task}", priority: ${taskPriority}`
-        })
+        const notifications = ['::Added task::', `'${task}'`]
+        if (taskPriority === 0) {
+          notifications.push('None')
+        } else {
+          notifications.push(taskPriority)
+        }
+        const classes = ['console-resolve-header', 'console-resolve-content', 'console-resolve-priority']
+        this.createNotification(notifications, classes)
         this.uniqueTasks++
       } else {
-        this.console.push({
-          message: 'Not valid value entered', number: this.console.length
-        })
+        this.createNotification(['Not valid value entered'], ['console-error-content'])
       }
     },
     removeTask (task) {
