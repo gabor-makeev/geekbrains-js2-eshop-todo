@@ -22,6 +22,7 @@ export default {
     taskList: [],
     originalList: [],
     console: [],
+    consoleIndex: null,
     uniqueTasks: 0,
     API_URL: 'http://localhost:3000'
   }),
@@ -54,6 +55,9 @@ export default {
           this.originalList = data
         })
     },
+    initConsole () {
+      this.consoleIndex = 0
+    },
     createNotification (text, textClass) {
       const content = []
       for (let element = 0; element < text.length; element++) {
@@ -62,9 +66,14 @@ export default {
           textClass: textClass[element]
         })
       }
-      this.console.push({
+      if (this.consoleIndex === null) {
+        this.initConsole()
+      } else {
+        this.consoleIndex++
+      }
+      this.console.unshift({
         content: content,
-        number: this.console.length
+        number: this.consoleIndex
       })
     },
     createTask (task, taskPriority) {

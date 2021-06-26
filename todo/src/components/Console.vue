@@ -30,9 +30,10 @@ export default {
 @import '../assets/_variables.scss';
 .console {
   width: 250px;
-  max-height: 80vh;
+  max-height: 81vh;
   background-color: $defaultGrey;
   padding: 10px;
+  overflow: auto;
   &-title {
     color: $defaultGreen;
   }
@@ -52,14 +53,13 @@ export default {
     }
     li span {
       display: flex;
-      flex-direction: column;
     }
   }
   &-error-content {
     color: rgba(255, 0, 0, 0.59);
   }
   &-resolve-header {
-    text-align: center;
+    padding: 0 calc(100px - 50% / 2);
     margin: 0 0 5px 0;
   }
   &-resolve-header,
