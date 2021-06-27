@@ -59,6 +59,14 @@ class taskListObj {
     })
   }
 
+  switchPinState (element) {
+    this.content.forEach(task => {
+      if (task.id === element.id) {
+        task.pinState = !task.pinState
+      }
+    })
+  }
+
   removeCompletedTasks () {
     this.content = this.content.filter(element => element.completionState === false)
     this.rerenderIndexes()
@@ -145,6 +153,26 @@ app.post('/toggleCompletion', (req, res) => {
 
       const taskList = new taskListObj(JSON.parse(data))
       taskList.switchCompletionState(req.body)
+
+      fs.writeFile('./database/taskList.json', JSON.stringify(taskList.content), (err) => {
+        if (err) {
+          res.send('{ "result": 0 }')
+        } else {
+          res.send('{ "result": 1 }')
+        }
+      })
+    }
+  })
+})
+
+app.post('/togglePin', (req, res) => {
+  fs.readFile('./database/taskList.json', 'utf8', (err, data) => {
+    if (err) {
+      res.send('{ "result": 0 }')
+    } else {
+
+      const taskList = new taskListObj(JSON.parse(data))
+      taskList.switchPinState(req.body)
 
       fs.writeFile('./database/taskList.json', JSON.stringify(taskList.content), (err) => {
         if (err) {
