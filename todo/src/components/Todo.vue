@@ -101,7 +101,7 @@ export default {
     background-color: rgba(255, 255, 0, 0.04);
     box-shadow: rgb(0, 0, 0) 0px 30px 60px -12px inset, rgba(255, 255, 255, 0.3) 0px 18px 36px -18px inset;
     position: relative;
-    padding: 45px 0 10px 20px;
+    padding: 45px 20px 10px 20px;
     margin: 0 0 0 70px;
     transition: 0.3s;
 
@@ -124,7 +124,8 @@ export default {
 
   &-unpinned {
     margin: 0 0 0 70px;
-    padding: 0 0 10px 20px;
+    padding: 0 20px 10px 20px;
+    width: 250px;
   }
 
   &-control {
